@@ -6,13 +6,13 @@ import { toast } from "sonner";
 import { Trophy, RotateCcw, Play } from "lucide-react";
 import { LoginForm } from "./LoginForm";
 
-// Import product images
-import appleImage from "@/assets/apple-iphone.jpg";
-import nikeImage from "@/assets/nike-shoes.jpg";
-import colaImage from "@/assets/coca-cola.jpg";
-import samsungImage from "@/assets/samsung-phone.jpg";
-import mcdonaldsImage from "@/assets/mcdonalds-burger.jpg";
-import starbucksImage from "@/assets/starbucks-coffee.jpg";
+// Import Jumia brand product images
+import tecnoImage from "@/assets/tecno-phone.jpg";
+import infinixImage from "@/assets/infinix-phone.jpg";
+import oraimoImage from "@/assets/oraimo-powerbank.jpg";
+import adidasImage from "@/assets/adidas-shoes.jpg";
+import samsungImage from "@/assets/samsung-galaxy.jpg";
+import iphoneImage from "@/assets/iphone.jpg";
 
 interface Question {
   id: number;
@@ -24,39 +24,39 @@ interface Question {
 const questions: Question[] = [
   {
     id: 1,
-    image: appleImage,
-    correctAnswer: "Apple",
-    options: ["Apple", "Samsung", "Google", "OnePlus"]
+    image: tecnoImage,
+    correctAnswer: "Tecno",
+    options: ["Tecno", "Infinix", "Samsung", "Redmi"]
   },
   {
     id: 2,
-    image: nikeImage,
-    correctAnswer: "Nike",
-    options: ["Nike", "Adidas", "Puma", "Reebok"]
+    image: infinixImage,
+    correctAnswer: "Infinix",
+    options: ["Infinix", "Tecno", "Oppo", "Realme"]
   },
   {
     id: 3,
-    image: colaImage,
-    correctAnswer: "Coca-Cola",
-    options: ["Coca-Cola", "Pepsi", "Dr Pepper", "Sprite"]
+    image: oraimoImage,
+    correctAnswer: "Oraimo",
+    options: ["Oraimo", "Anker", "Romoss", "New Age"]
   },
   {
     id: 4,
+    image: adidasImage,
+    correctAnswer: "Adidas",
+    options: ["Adidas", "Nike", "Puma", "Reebok"]
+  },
+  {
+    id: 5,
     image: samsungImage,
     correctAnswer: "Samsung",
     options: ["Samsung", "Apple", "Huawei", "Xiaomi"]
   },
   {
-    id: 5,
-    image: mcdonaldsImage,
-    correctAnswer: "McDonald's",
-    options: ["McDonald's", "Burger King", "KFC", "Subway"]
-  },
-  {
     id: 6,
-    image: starbucksImage,
-    correctAnswer: "Starbucks",
-    options: ["Starbucks", "Dunkin'", "Costa", "Tim Hortons"]
+    image: iphoneImage,
+    correctAnswer: "Apple",
+    options: ["Apple", "Samsung", "Google", "OnePlus"]
   }
 ];
 
