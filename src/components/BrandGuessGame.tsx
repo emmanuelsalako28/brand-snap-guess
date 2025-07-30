@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Trophy, RotateCcw, Play } from "lucide-react";
+import { LoginForm } from "./LoginForm";
 
 // Import product images
 import appleImage from "@/assets/apple-iphone.jpg";
@@ -59,10 +60,16 @@ const questions: Question[] = [
   }
 ];
 
-type GameState = "start" | "playing" | "finished";
+type GameState = "login" | "start" | "playing" | "finished";
+
+interface User {
+  name: string;
+  email: string;
+}
 
 export const BrandGuessGame = () => {
-  const [gameState, setGameState] = useState<GameState>("start");
+  const [gameState, setGameState] = useState<GameState>("login");
+  const [user, setUser] = useState<User | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -77,6 +84,12 @@ export const BrandGuessGame = () => {
       handleAnswer("");
     }
   }, [timeLeft, gameState, isAnswered]);
+
+  const handleLogin = (name: string, email: string) => {
+    setUser({ name, email });
+    setGameState("start");
+    toast.success(`Welcome ${name}! 🎉`);
+  };
 
   const startGame = () => {
     setGameState("playing");
@@ -131,6 +144,10 @@ export const BrandGuessGame = () => {
     return "Better luck next time! 🎯";
   };
 
+  if (gameState === "login") {
+    return <LoginForm onLogin={handleLogin} />;
+  }
+
   if (gameState === "start") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -143,7 +160,7 @@ export const BrandGuessGame = () => {
               Brand Snap Guess
             </h1>
             <p className="text-muted-foreground">
-              Test your brand knowledge! Guess the brand from product images.
+              Welcome back, {user?.name}! Ready to test your brand knowledge?
             </p>
           </div>
           <div className="space-y-4">
