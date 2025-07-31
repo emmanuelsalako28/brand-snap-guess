@@ -60,6 +60,11 @@ export default {
 					DEFAULT: 'hsl(var(--warning))',
 					foreground: 'hsl(var(--warning-foreground))'
 				},
+				jumia: {
+					DEFAULT: 'hsl(var(--jumia-orange))',
+					light: 'hsl(var(--jumia-orange-light))',
+					dark: 'hsl(var(--jumia-orange-dark))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

@@ -8,26 +8,26 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 235 21% 11%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
 
-    --card: 224 33% 15%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 224 33% 15%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 263 85% 65%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 22 100% 52%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 25% 20%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
 
-    --muted: 215 25% 20%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 216 87% 52%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 22 100% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -42,13 +42,12 @@ All colors MUST be HSL.
     --warning: 48 96% 53%;
     --warning-foreground: 222.2 84% 4.9%;
 
-    --game-bg: 235 21% 11%;
-    --game-card: 224 33% 15%;
-    --game-primary: 263 85% 65%;
-    --game-secondary: 216 87% 52%;
-    --gradient-game: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    --jumia-orange: 22 100% 52%;
+    --jumia-orange-light: 22 100% 60%;
+    --jumia-orange-dark: 22 100% 45%;
+    --gradient-jumia: linear-gradient(135deg, hsl(var(--jumia-orange)), hsl(var(--jumia-orange-light)));
     --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(142 76% 50%));
-    --gradient-card: linear-gradient(135deg, hsl(var(--card)), hsl(215 25% 18%));
+    --gradient-card: linear-gradient(135deg, hsl(var(--card)), hsl(210 40% 98%));
 
     --radius: 0.5rem;
 
@@ -79,8 +78,8 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 22 100% 52%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -88,8 +87,8 @@ All colors MUST be HSL.
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 22 100% 60%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;

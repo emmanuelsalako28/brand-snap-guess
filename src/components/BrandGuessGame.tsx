@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Trophy, RotateCcw, Play } from "lucide-react";
+import { Trophy, RotateCcw, Play, Send } from "lucide-react";
 import { LoginForm } from "./LoginForm";
 
 // Import Jumia brand product images
@@ -18,7 +19,7 @@ interface Question {
   id: number;
   image: string;
   correctAnswer: string;
-  options: string[];
+  acceptableAnswers: string[];
 }
 
 const questions: Question[] = [
@@ -26,37 +27,37 @@ const questions: Question[] = [
     id: 1,
     image: tecnoImage,
     correctAnswer: "Tecno",
-    options: ["Tecno", "Infinix", "Samsung", "Redmi"]
+    acceptableAnswers: ["tecno", "tecno mobile", "tecno phone"]
   },
   {
     id: 2,
     image: infinixImage,
     correctAnswer: "Infinix",
-    options: ["Infinix", "Tecno", "Oppo", "Realme"]
+    acceptableAnswers: ["infinix", "infinix mobile", "infinix phone"]
   },
   {
     id: 3,
     image: oraimoImage,
     correctAnswer: "Oraimo",
-    options: ["Oraimo", "Anker", "Romoss", "New Age"]
+    acceptableAnswers: ["oraimo", "oraimo power bank", "oraimo powerbank"]
   },
   {
     id: 4,
     image: adidasImage,
     correctAnswer: "Adidas",
-    options: ["Adidas", "Nike", "Puma", "Reebok"]
+    acceptableAnswers: ["adidas", "adidas shoes", "adidas sneakers"]
   },
   {
     id: 5,
     image: samsungImage,
     correctAnswer: "Samsung",
-    options: ["Samsung", "Apple", "Huawei", "Xiaomi"]
+    acceptableAnswers: ["samsung", "samsung galaxy", "samsung phone"]
   },
   {
     id: 6,
     image: iphoneImage,
     correctAnswer: "Apple",
-    options: ["Apple", "Samsung", "Google", "OnePlus"]
+    acceptableAnswers: ["apple", "iphone", "apple iphone"]
   }
 ];
 
@@ -72,16 +73,16 @@ export const BrandGuessGame = () => {
   const [user, setUser] = useState<User | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [userAnswer, setUserAnswer] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(15);
+  const [timeLeft, setTimeLeft] = useState(30);
 
   useEffect(() => {
     if (gameState === "playing" && timeLeft > 0 && !isAnswered) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && !isAnswered) {
-      handleAnswer("");
+      handleAnswer();
     }
   }, [timeLeft, gameState, isAnswered]);
 
@@ -95,18 +96,21 @@ export const BrandGuessGame = () => {
     setGameState("playing");
     setCurrentQuestion(0);
     setScore(0);
-    setSelectedAnswer(null);
+    setUserAnswer("");
     setIsAnswered(false);
-    setTimeLeft(15);
+    setTimeLeft(30);
   };
 
-  const handleAnswer = (answer: string) => {
+  const handleAnswer = () => {
     if (isAnswered) return;
 
-    setSelectedAnswer(answer);
     setIsAnswered(true);
 
-    const isCorrect = answer === questions[currentQuestion].correctAnswer;
+    const userAnswerLower = userAnswer.toLowerCase().trim();
+    const isCorrect = questions[currentQuestion].acceptableAnswers.some(
+      acceptableAnswer => acceptableAnswer.toLowerCase() === userAnswerLower
+    );
+
     if (isCorrect) {
       setScore(score + 1);
       toast.success("Correct! 🎉");
@@ -117,22 +121,29 @@ export const BrandGuessGame = () => {
     setTimeout(() => {
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
-        setSelectedAnswer(null);
+        setUserAnswer("");
         setIsAnswered(false);
-        setTimeLeft(15);
+        setTimeLeft(30);
       } else {
         setGameState("finished");
       }
     }, 2000);
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (userAnswer.trim() && !isAnswered) {
+      handleAnswer();
+    }
+  };
+
   const resetGame = () => {
     setGameState("start");
     setCurrentQuestion(0);
     setScore(0);
-    setSelectedAnswer(null);
+    setUserAnswer("");
     setIsAnswered(false);
-    setTimeLeft(15);
+    setTimeLeft(30);
   };
 
   const getScoreMessage = () => {
@@ -151,13 +162,13 @@ export const BrandGuessGame = () => {
   if (gameState === "start") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-primary/20">
+        <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
           <div className="space-y-4">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-              <Trophy className="w-8 h-8 text-primary-foreground" />
+            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-jumia to-jumia-light rounded-full flex items-center justify-center">
+              <Trophy className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Brand Snap Guess
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent">
+              Jumia Brand Guess
             </h1>
             <p className="text-muted-foreground">
               Welcome back, {user?.name}! Ready to test your brand knowledge?
@@ -166,12 +177,12 @@ export const BrandGuessGame = () => {
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground space-y-1">
               <p>• {questions.length} questions</p>
-              <p>• 15 seconds per question</p>
-              <p>• Multiple choice answers</p>
+              <p>• 30 seconds per question</p>
+              <p>• Type your answer</p>
             </div>
             <Button 
               onClick={startGame} 
-              className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+              className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
               size="lg"
             >
               <Play className="w-4 h-4 mr-2" />
@@ -186,7 +197,7 @@ export const BrandGuessGame = () => {
   if (gameState === "finished") {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-primary/20">
+        <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
           <div className="space-y-4">
             <div className="w-20 h-20 mx-auto bg-gradient-to-br from-success to-success/80 rounded-full flex items-center justify-center">
               <Trophy className="w-10 h-10 text-success-foreground" />
@@ -196,14 +207,14 @@ export const BrandGuessGame = () => {
           </div>
           <div className="space-y-4">
             <div className="text-center">
-              <div className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <div className="text-4xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent">
                 {score}/{questions.length}
               </div>
               <p className="text-muted-foreground">Final Score</p>
             </div>
             <Button 
               onClick={resetGame} 
-              className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+              className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
               size="lg"
             >
               <RotateCcw className="w-4 h-4 mr-2" />
@@ -240,7 +251,7 @@ export const BrandGuessGame = () => {
         </div>
 
         {/* Question Card */}
-        <Card className="p-6 mb-6 bg-gradient-to-br from-card to-card/80 border-primary/20">
+        <Card className="p-6 mb-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
           <div className="text-center space-y-6">
             <h2 className="text-xl font-semibold">Which brand is this?</h2>
             <div className="relative w-64 h-64 mx-auto bg-white rounded-lg p-4 shadow-lg">
@@ -253,36 +264,47 @@ export const BrandGuessGame = () => {
           </div>
         </Card>
 
-        {/* Answer Options */}
-        <div className="grid grid-cols-2 gap-4">
-          {question.options.map((option) => {
-            let buttonClass = "h-16 text-lg font-medium transition-all duration-200 ";
-            
-            if (isAnswered) {
-              if (option === question.correctAnswer) {
-                buttonClass += "bg-gradient-to-r from-success to-success/80 border-success text-success-foreground";
-              } else if (option === selectedAnswer) {
-                buttonClass += "bg-gradient-to-r from-destructive to-destructive/80 border-destructive text-destructive-foreground";
-              } else {
-                buttonClass += "bg-muted text-muted-foreground cursor-not-allowed";
-              }
-            } else {
-              buttonClass += "bg-gradient-to-r from-secondary to-secondary/80 hover:from-primary hover:to-accent hover:text-primary-foreground border-border";
-            }
-
-            return (
-              <Button
-                key={option}
-                onClick={() => handleAnswer(option)}
+        {/* Answer Input */}
+        <Card className="p-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="answer" className="text-sm font-medium">
+                Type your answer:
+              </label>
+              <Input
+                id="answer"
+                type="text"
+                placeholder="Enter the brand name..."
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
                 disabled={isAnswered}
-                className={buttonClass}
-                variant="outline"
-              >
-                {option}
-              </Button>
-            );
-          })}
-        </div>
+                className="text-lg h-12"
+              />
+            </div>
+            <Button 
+              type="submit" 
+              disabled={!userAnswer.trim() || isAnswered}
+              className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
+              size="lg"
+            >
+              <Send className="w-4 h-4 mr-2" />
+              Submit Answer
+            </Button>
+          </form>
+          
+          {isAnswered && (
+            <div className="mt-4 p-4 rounded-lg bg-muted">
+              <p className="text-sm text-muted-foreground">
+                {userAnswer.toLowerCase().trim() && questions[currentQuestion].acceptableAnswers.some(
+                  acceptableAnswer => acceptableAnswer.toLowerCase() === userAnswer.toLowerCase().trim()
+                ) 
+                  ? "✅ Correct! Well done!" 
+                  : `❌ The correct answer was: ${questions[currentQuestion].correctAnswer}`
+                }
+              </p>
+            </div>
+          )}
+        </Card>
       </div>
     </div>
   );
