@@ -3,8 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Trophy, RotateCcw, Play, Send } from "lucide-react";
+import { Trophy, RotateCcw, Play, Send, Medal, Crown } from "lucide-react";
 import { LoginForm } from "./LoginForm";
 
 // Import Jumia brand product images
@@ -67,6 +69,23 @@ interface User {
   name: string;
   email: string;
 }
+
+interface LeaderboardEntry {
+  id: number;
+  name: string;
+  score: number;
+  maxScore: number;
+  date: string;
+}
+
+// Mock leaderboard data - In production, this would come from Supabase
+const mockLeaderboard: LeaderboardEntry[] = [
+  { id: 1, name: "Victor Idowu", score: 6, maxScore: 6, date: "2024-01-20" },
+  { id: 2, name: "Oluwasegun", score: 5, maxScore: 6, date: "2024-01-19" },
+  { id: 3, name: "Aliu OLUWATAYO", score: 4, maxScore: 6, date: "2024-01-18" },
+  { id: 4, name: "Abraham", score: 4, maxScore: 6, date: "2024-01-17" },
+  { id: 5, name: "Nicholas", score: 3, maxScore: 6, date: "2024-01-16" },
+];
 
 export const BrandGuessGame = () => {
   const [gameState, setGameState] = useState<GameState>("login");
@@ -159,78 +178,79 @@ export const BrandGuessGame = () => {
     return <LoginForm onLogin={handleLogin} />;
   }
 
-  if (gameState === "start") {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
-          <div className="space-y-4">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-jumia to-jumia-light rounded-full flex items-center justify-center">
-              <Trophy className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent">
-              Jumia Brand Guess
-            </h1>
-            <p className="text-muted-foreground">
-              Welcome back, {user?.name}! Ready to test your brand knowledge?
-            </p>
-          </div>
-          <div className="space-y-4">
-            <div className="text-sm text-muted-foreground space-y-1">
-              <p>• {questions.length} questions</p>
-              <p>• 30 seconds per question</p>
-              <p>• Type your answer</p>
-            </div>
-            <Button 
-              onClick={startGame} 
-              className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
-              size="lg"
-            >
-              <Play className="w-4 h-4 mr-2" />
-              Start Game
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  if (gameState === "finished") {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
-        <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
-          <div className="space-y-4">
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-success to-success/80 rounded-full flex items-center justify-center">
-              <Trophy className="w-10 h-10 text-success-foreground" />
-            </div>
-            <h2 className="text-2xl font-bold">Game Complete!</h2>
-            <p className="text-lg">{getScoreMessage()}</p>
-          </div>
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="text-4xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent">
-                {score}/{questions.length}
+  const renderGameContent = () => {
+    if (gameState === "start") {
+      return (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
+            <div className="space-y-4">
+              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-jumia to-jumia-light rounded-full flex items-center justify-center">
+                <Trophy className="w-8 h-8 text-white" />
               </div>
-              <p className="text-muted-foreground">Final Score</p>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent">
+                Jumia Brand Guess
+              </h1>
+              <p className="text-muted-foreground">
+                Welcome back, {user?.name}! Ready to test your brand knowledge?
+              </p>
             </div>
-            <Button 
-              onClick={resetGame} 
-              className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
-              size="lg"
-            >
-              <RotateCcw className="w-4 h-4 mr-2" />
-              Play Again
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+            <div className="space-y-4">
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p>• {questions.length} questions</p>
+                <p>• 30 seconds per question</p>
+                <p>• Type your answer</p>
+              </div>
+              <Button 
+                onClick={startGame} 
+                className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
+                size="lg"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Start Game
+              </Button>
+            </div>
+          </Card>
+        </div>
+      );
+    }
 
-  const question = questions[currentQuestion];
-  const progress = ((currentQuestion + 1) / questions.length) * 100;
+    if (gameState === "finished") {
+      return (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
+            <div className="space-y-4">
+              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-success to-success/80 rounded-full flex items-center justify-center">
+                <Trophy className="w-10 h-10 text-success-foreground" />
+              </div>
+              <h2 className="text-2xl font-bold">Game Complete!</h2>
+              <p className="text-lg">{getScoreMessage()}</p>
+            </div>
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="text-4xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent">
+                  {score}/{questions.length}
+                </div>
+                <p className="text-muted-foreground">Final Score</p>
+              </div>
+              <Button 
+                onClick={resetGame} 
+                className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
+                size="lg"
+              >
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Play Again
+              </Button>
+            </div>
+          </Card>
+        </div>
+      );
+    }
 
-  return (
-    <div className="min-h-screen bg-background p-4">
+    // Playing state
+    const question = questions[currentQuestion];
+    const progress = ((currentQuestion + 1) / questions.length) * 100;
+
+    return (
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="mb-6 space-y-4">
@@ -305,6 +325,103 @@ export const BrandGuessGame = () => {
             </div>
           )}
         </Card>
+      </div>
+    );
+  };
+
+  const renderLeaderboard = () => {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <Card className="bg-gradient-to-br from-card to-card/80 border-jumia/20">
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-jumia to-jumia-light rounded-full flex items-center justify-center">
+                <Crown className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent">
+                Leaderboard
+              </h2>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="flex justify-between items-center text-sm text-muted-foreground">
+                <span>REFRESH: 9m : 52s</span>
+                <span>SCORE DATE</span>
+              </div>
+              
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-jumia/10">
+                    <TableHead className="text-left font-medium">Name</TableHead>
+                    <TableHead className="text-center font-medium">Score</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mockLeaderboard.map((entry, index) => (
+                    <TableRow key={entry.id} className="border-jumia/10 hover:bg-jumia/5">
+                      <TableCell className="font-medium flex items-center gap-3">
+                        {index === 0 && <Crown className="w-4 h-4 text-yellow-500" />}
+                        {index === 1 && <Medal className="w-4 h-4 text-gray-400" />}
+                        {index === 2 && <Medal className="w-4 h-4 text-amber-600" />}
+                        <span className={index < 3 ? "font-bold" : ""}>{entry.name}</span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-bold text-jumia">
+                          {entry.score} out of {entry.maxScore}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              
+              <div className="text-center text-sm text-muted-foreground mt-4">
+                <p>💡 Connect to Supabase to save your scores and compete!</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent mb-2">
+            Jumia Brand Guess
+          </h1>
+          <p className="text-muted-foreground">
+            Welcome {user?.name}! Test your brand knowledge
+          </p>
+        </div>
+
+        <Tabs defaultValue="game" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted">
+            <TabsTrigger 
+              value="game" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-jumia data-[state=active]:to-jumia-light data-[state=active]:text-white"
+            >
+              Game
+            </TabsTrigger>
+            <TabsTrigger 
+              value="leaderboard"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-jumia data-[state=active]:to-jumia-light data-[state=active]:text-white"
+            >
+              Leaderboard
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="game" className="mt-0">
+            {renderGameContent()}
+          </TabsContent>
+          
+          <TabsContent value="leaderboard" className="mt-0">
+            {renderLeaderboard()}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
