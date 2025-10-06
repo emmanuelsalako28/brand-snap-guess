@@ -8,6 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { Trophy, RotateCcw, Play, Send, Medal, Crown } from "lucide-react";
 import { LoginForm } from "./LoginForm";
+import { auth, db } from "@/lib/firebase";
+import { collection, addDoc, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 // Import Jumia brand product images
 import tecnoImage from "@/assets/tecno-phone.jpg";
@@ -78,15 +81,6 @@ interface LeaderboardEntry {
   date: string;
 }
 
-// Mock leaderboard data - In production, this would come from Supabase
-const mockLeaderboard: LeaderboardEntry[] = [
-  { id: 1, name: "Victor Idowu", score: 6, maxScore: 6, date: "2024-01-20" },
-  { id: 2, name: "Oluwasegun", score: 5, maxScore: 6, date: "2024-01-19" },
-  { id: 3, name: "Aliu OLUWATAYO", score: 4, maxScore: 6, date: "2024-01-18" },
-  { id: 4, name: "Abraham", score: 4, maxScore: 6, date: "2024-01-17" },
-  { id: 5, name: "Nicholas", score: 3, maxScore: 6, date: "2024-01-16" },
-];
-
 export const BrandGuessGame = () => {
   const [gameState, setGameState] = useState<GameState>("login");
   const [user, setUser] = useState<User | null>(null);
@@ -95,6 +89,50 @@ export const BrandGuessGame = () => {
   const [userAnswer, setUserAnswer] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
   const [timeLeft, setTimeLeft] = useState(30);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(true);
+
+  // Check auth state
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser && !user) {
+        // User is signed in
+        setUser({ name: user?.name || "", email: firebaseUser.email || "" });
+      } else if (!firebaseUser) {
+        setGameState("login");
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Load leaderboard
+  useEffect(() => {
+    const loadLeaderboard = async () => {
+      try {
+        const q = query(
+          collection(db, "scores"),
+          orderBy("score", "desc"),
+          limit(10)
+        );
+        const querySnapshot = await getDocs(q);
+        const scores: LeaderboardEntry[] = querySnapshot.docs.map((doc, index) => ({
+          id: index + 1,
+          name: doc.data().name,
+          score: doc.data().score,
+          maxScore: doc.data().maxScore,
+          date: doc.data().date
+        }));
+        setLeaderboard(scores);
+      } catch (error) {
+        console.error("Error loading leaderboard:", error);
+      } finally {
+        setIsLoadingLeaderboard(false);
+      }
+    };
+
+    loadLeaderboard();
+  }, [gameState]);
 
   useEffect(() => {
     if (gameState === "playing" && timeLeft > 0 && !isAnswered) {
@@ -144,9 +182,30 @@ export const BrandGuessGame = () => {
         setIsAnswered(false);
         setTimeLeft(30);
       } else {
+        // Save score to Firebase
+        saveScore();
         setGameState("finished");
       }
     }, 2000);
+  };
+
+  const saveScore = async () => {
+    if (!user) return;
+    
+    try {
+      await addDoc(collection(db, "scores"), {
+        name: user.name,
+        email: user.email,
+        score: score,
+        maxScore: questions.length,
+        date: new Date().toISOString().split('T')[0],
+        timestamp: new Date().toISOString()
+      });
+      toast.success("Score saved to leaderboard!");
+    } catch (error) {
+      console.error("Error saving score:", error);
+      toast.error("Failed to save score");
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -357,27 +416,37 @@ export const BrandGuessGame = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockLeaderboard.map((entry, index) => (
-                    <TableRow key={entry.id} className="border-jumia/10 hover:bg-jumia/5">
-                      <TableCell className="font-medium flex items-center gap-3">
-                        {index === 0 && <Crown className="w-4 h-4 text-yellow-500" />}
-                        {index === 1 && <Medal className="w-4 h-4 text-gray-400" />}
-                        {index === 2 && <Medal className="w-4 h-4 text-amber-600" />}
-                        <span className={index < 3 ? "font-bold" : ""}>{entry.name}</span>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <span className="font-bold text-jumia">
-                          {entry.score} out of {entry.maxScore}
-                        </span>
+                  {isLoadingLeaderboard ? (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-center py-8">
+                        Loading leaderboard...
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : leaderboard.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={2} className="text-center py-8 text-muted-foreground">
+                        No scores yet. Be the first to play!
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    leaderboard.map((entry, index) => (
+                      <TableRow key={entry.id} className="border-jumia/10 hover:bg-jumia/5">
+                        <TableCell className="font-medium flex items-center gap-3">
+                          {index === 0 && <Crown className="w-4 h-4 text-yellow-500" />}
+                          {index === 1 && <Medal className="w-4 h-4 text-gray-400" />}
+                          {index === 2 && <Medal className="w-4 h-4 text-amber-600" />}
+                          <span className={index < 3 ? "font-bold" : ""}>{entry.name}</span>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <span className="font-bold text-jumia">
+                            {entry.score} out of {entry.maxScore}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
-              
-              <div className="text-center text-sm text-muted-foreground mt-4">
-                <p>💡 Connect to Supabase to save your scores and compete!</p>
-              </div>
             </div>
           </div>
         </Card>
