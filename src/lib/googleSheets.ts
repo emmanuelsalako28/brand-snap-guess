@@ -9,23 +9,25 @@ export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
   const gid = "964404709";
   
   try {
-    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?tqx=out:json&gid=${gid}`;
+    const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${gid}`;
     const response = await fetch(url);
     const text = await response.text();
     
-    // Remove the JSON-P wrapper
-    const jsonString = text.substring(47).slice(0, -2);
-    const data = JSON.parse(jsonString);
+    // Parse CSV
+    const lines = text.trim().split('\n');
     
-    // Parse rows (skip header row)
-    const rows = data.table.rows.slice(1);
-    
-    const questions: SheetQuestion[] = rows
-      .filter((row: any) => row.c && row.c[0] && row.c[1]) // Ensure row has data
-      .map((row: any) => {
-        const imageUrl = row.c[0]?.v || "";
-        const correctAnswer = row.c[1]?.v || "";
-        const acceptableAnswersRaw = row.c[2]?.v || "";
+    // Skip header row and parse data rows
+    const questions: SheetQuestion[] = lines
+      .slice(1)
+      .filter(line => line.trim())
+      .map(line => {
+        // Simple CSV parsing (handles quoted fields)
+        const columns = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || [];
+        const cleanedColumns = columns.map(col => col.replace(/^"|"$/g, '').trim());
+        
+        const imageUrl = cleanedColumns[0] || "";
+        const correctAnswer = cleanedColumns[1] || "";
+        const acceptableAnswersRaw = cleanedColumns[2] || "";
         
         // Parse acceptable answers (comma-separated)
         const acceptableAnswers = acceptableAnswersRaw
@@ -37,7 +39,8 @@ export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
           correctAnswer,
           acceptableAnswers
         };
-      });
+      })
+      .filter(q => q.image && q.correctAnswer);
     
     return questions;
   } catch (error) {

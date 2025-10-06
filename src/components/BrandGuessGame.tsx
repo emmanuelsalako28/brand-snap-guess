@@ -8,8 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { Trophy, RotateCcw, Play, Send, Medal, Crown } from "lucide-react";
 import { LoginForm } from "./LoginForm";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@/lib/convex/_generated/api";
 
 // Import Jumia brand product images
 import itel from "@/assets/itel.jpg";
@@ -92,8 +90,6 @@ export const BrandGuessGame = () => {
   const [userAnswer, setUserAnswer] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
   const [timeLeft, setTimeLeft] = useState(15);
-  const leaderboardEntries = useQuery(api.leaderboardEntry.getEntries)
-  const mutation = useMutation(api.leaderboardEntry.setEntry)
 
   useEffect(() => {
     if (gameState === "playing" && timeLeft > 0 && !isAnswered) {
@@ -144,14 +140,6 @@ export const BrandGuessGame = () => {
         setTimeLeft(15);
       } else {
         setGameState("finished");
-
-        await mutation({
-          name: user.name,
-          email: user.email,
-          score: score,
-          maxScore: questions.length,
-          date: new Date().toLocaleString()
-        })
       }
     }, 2000);
   };
@@ -364,8 +352,8 @@ export const BrandGuessGame = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {leaderboardEntries.map((entry, index) => (
-                    <TableRow key={entry._id} className="border-jumia/10 hover:bg-jumia/5">
+                  {mockLeaderboard.map((entry, index) => (
+                    <TableRow key={entry.id} className="border-jumia/10 hover:bg-jumia/5">
                       <TableCell className="font-medium flex items-center gap-3">
                         {index === 0 && <Crown className="w-4 h-4 text-yellow-500" />}
                         {index === 1 && <Medal className="w-4 h-4 text-gray-400" />}
