@@ -5,9 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Mail, LogIn } from "lucide-react";
 import { toast } from "sonner";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
 
 interface LoginFormProps {
   onLogin: (name: string, email: string) => void;
@@ -16,10 +13,8 @@ interface LoginFormProps {
 export const LoginForm = ({ onLogin }: LoginFormProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name.trim()) {
@@ -31,47 +26,13 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
       toast.error("Please enter your email");
       return;
     }
-
-    if (!password.trim() || password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return;
-    }
     
     if (!/\S+@\S+\.\S+/.test(email)) {
       toast.error("Please enter a valid email address");
       return;
     }
 
-    setIsLoading(true);
-    
-    try {
-      // Try to sign in first
-      let userCredential;
-      try {
-        userCredential = await signInWithEmailAndPassword(auth, email, password);
-      } catch (error: any) {
-        // If user doesn't exist, create new account
-        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-          userCredential = await createUserWithEmailAndPassword(auth, email, password);
-          
-          // Save user profile to Firestore
-          await setDoc(doc(db, "users", userCredential.user.uid), {
-            name: name.trim(),
-            email: email.trim(),
-            createdAt: new Date().toISOString()
-          });
-        } else {
-          throw error;
-        }
-      }
-      
-      onLogin(name.trim(), email.trim());
-    } catch (error: any) {
-      console.error("Auth error:", error);
-      toast.error(error.message || "Authentication failed");
-    } finally {
-      setIsLoading(false);
-    }
+    onLogin(name.trim(), email.trim());
   };
 
   return (
@@ -126,30 +87,13 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-medium">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password (min 6 characters)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full"
-              required
-              minLength={6}
-            />
-          </div>
-
           <Button 
             type="submit"
-            disabled={isLoading}
             className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
             size="lg"
           >
             <LogIn className="w-4 h-4 mr-2" />
-            {isLoading ? "Loading..." : "Start Playing"}
+            Start Playing
           </Button>
         </form>
       </Card>

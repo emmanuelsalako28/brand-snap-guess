@@ -8,9 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { Trophy, RotateCcw, Play, Send, Medal, Crown } from "lucide-react";
 import { LoginForm } from "./LoginForm";
-import { auth, db } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { collection, addDoc, getDocs, query, orderBy, limit } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
 
 // Import Jumia brand product images
 import tecnoImage from "@/assets/tecno-phone.jpg";
@@ -91,20 +90,6 @@ export const BrandGuessGame = () => {
   const [timeLeft, setTimeLeft] = useState(30);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(true);
-
-  // Check auth state
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser && !user) {
-        // User is signed in
-        setUser({ name: user?.name || "", email: firebaseUser.email || "" });
-      } else if (!firebaseUser) {
-        setGameState("login");
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   // Load leaderboard
   useEffect(() => {
