@@ -1,0 +1,86 @@
+export interface SheetQuestion {
+  id: number;
+  image: string;
+  correctAnswer: string;
+  acceptableAnswers: string[];
+}
+
+const SHEET_ID = "1eD8qXU3MOaNZoM9E6va4_1FHzzbREQ_cdErbSj34ZLY";
+
+export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
+  try {
+    // Fetch as CSV (works for public sheets)
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      throw new Error("Failed to fetch sheet data");
+    }
+    
+    const csvText = await response.text();
+    const rows = parseCSV(csvText);
+    
+    // Skip header row (first row)
+    const dataRows = rows.slice(1);
+    
+    const questions: SheetQuestion[] = dataRows
+      .filter(row => row[0] && row[1]) // Filter out empty rows
+      .map((row, index) => ({
+        id: index + 1,
+        image: row[0]?.trim() || "",           // Column A: Image URL
+        correctAnswer: row[1]?.trim() || "",   // Column B: Correct Answer
+        acceptableAnswers: row[2]              // Column C: Acceptable Answers (comma-separated)
+          ? row[2].split(",").map(a => a.trim().toLowerCase())
+          : [row[1]?.trim().toLowerCase() || ""]
+      }));
+    
+    return questions;
+  } catch (error) {
+    console.error("Error fetching questions from Google Sheet:", error);
+    return [];
+  }
+}
+
+function parseCSV(csvText: string): string[][] {
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = "";
+  let insideQuotes = false;
+
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+    const nextChar = csvText[i + 1];
+
+    if (char === '"') {
+      if (insideQuotes && nextChar === '"') {
+        currentCell += '"';
+        i++;
+      } else {
+        insideQuotes = !insideQuotes;
+      }
+    } else if (char === "," && !insideQuotes) {
+      currentRow.push(currentCell);
+      currentCell = "";
+    } else if ((char === "\n" || (char === "\r" && nextChar === "\n")) && !insideQuotes) {
+      currentRow.push(currentCell);
+      rows.push(currentRow);
+      currentRow = [];
+      currentCell = "";
+      if (char === "\r") i++;
+    } else if (char === "\r" && !insideQuotes) {
+      currentRow.push(currentCell);
+      rows.push(currentRow);
+      currentRow = [];
+      currentCell = "";
+    } else {
+      currentCell += char;
+    }
+  }
+
+  if (currentCell || currentRow.length > 0) {
+    currentRow.push(currentCell);
+    rows.push(currentRow);
+  }
+
+  return rows;
+}

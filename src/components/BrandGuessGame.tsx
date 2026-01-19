@@ -6,18 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { Trophy, RotateCcw, Play, Send, Medal, Crown } from "lucide-react";
+import { Trophy, RotateCcw, Play, Send, Medal, Crown, Loader2 } from "lucide-react";
 import { LoginForm } from "./LoginForm";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, getDocs, query, orderBy, limit } from "firebase/firestore";
-
-// Import Jumia brand product images
-import tecnoImage from "@/assets/tecno-phone.jpg";
-import infinixImage from "@/assets/infinix-phone.jpg";
-import oraimoImage from "@/assets/oraimo-powerbank.jpg";
-import adidasImage from "@/assets/adidas-shoes.jpg";
-import samsungImage from "@/assets/samsung-galaxy.jpg";
-import iphoneImage from "@/assets/iphone.jpg";
+import { fetchQuestionsFromSheet, SheetQuestion } from "@/lib/googleSheets";
 
 interface Question {
   id: number;
@@ -25,45 +18,6 @@ interface Question {
   correctAnswer: string;
   acceptableAnswers: string[];
 }
-
-const questions: Question[] = [
-  {
-    id: 1,
-    image: tecnoImage,
-    correctAnswer: "Tecno",
-    acceptableAnswers: ["tecno", "tecno mobile", "tecno phone"]
-  },
-  {
-    id: 2,
-    image: infinixImage,
-    correctAnswer: "Infinix",
-    acceptableAnswers: ["infinix", "infinix mobile", "infinix phone"]
-  },
-  {
-    id: 3,
-    image: oraimoImage,
-    correctAnswer: "Oraimo",
-    acceptableAnswers: ["oraimo", "oraimo power bank", "oraimo powerbank"]
-  },
-  {
-    id: 4,
-    image: adidasImage,
-    correctAnswer: "Adidas",
-    acceptableAnswers: ["adidas", "adidas shoes", "adidas sneakers"]
-  },
-  {
-    id: 5,
-    image: samsungImage,
-    correctAnswer: "Samsung",
-    acceptableAnswers: ["samsung", "samsung galaxy", "samsung phone"]
-  },
-  {
-    id: 6,
-    image: iphoneImage,
-    correctAnswer: "Apple",
-    acceptableAnswers: ["apple", "iphone", "apple iphone"]
-  }
-];
 
 type GameState = "login" | "start" | "playing" | "finished";
 
@@ -90,6 +44,24 @@ export const BrandGuessGame = () => {
   const [timeLeft, setTimeLeft] = useState(30);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(true);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
+
+  // Load questions from Google Sheet
+  useEffect(() => {
+    const loadQuestions = async () => {
+      try {
+        const sheetQuestions = await fetchQuestionsFromSheet();
+        setQuestions(sheetQuestions);
+      } catch (error) {
+        console.error("Error loading questions:", error);
+        toast.error("Failed to load questions");
+      } finally {
+        setIsLoadingQuestions(false);
+      }
+    };
+    loadQuestions();
+  }, []);
 
   // Load leaderboard
   useEffect(() => {
@@ -223,6 +195,27 @@ export const BrandGuessGame = () => {
   }
 
   const renderGameContent = () => {
+    if (isLoadingQuestions) {
+      return (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
+            <Loader2 className="w-12 h-12 mx-auto animate-spin text-jumia" />
+            <p className="text-muted-foreground">Loading questions...</p>
+          </Card>
+        </div>
+      );
+    }
+
+    if (questions.length === 0) {
+      return (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
+            <p className="text-destructive">No questions found. Please check your Google Sheet.</p>
+          </Card>
+        </div>
+      );
+    }
+
     if (gameState === "start") {
       return (
         <div className="flex items-center justify-center min-h-[60vh]">
