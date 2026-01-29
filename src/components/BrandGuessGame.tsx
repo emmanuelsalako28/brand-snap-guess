@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Trophy, RotateCcw, Play, Send, Medal, Crown, Loader2 } from "lucide-react";
 import { LoginForm } from "./LoginForm";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, orderBy, limit, where } from "firebase/firestore";
 import { fetchQuestionsFromSheet, SheetQuestion } from "@/lib/googleSheets";
 
 interface Question {
@@ -63,6 +63,21 @@ export const BrandGuessGame = () => {
     loadQuestions();
   }, []);
 
+  // Persistent Login: Check for saved user on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem("brandSnap_user");
+    if (savedUser) {
+      try {
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        setGameState("start");
+      } catch (error) {
+        console.error("Error parsing saved user:", error);
+        localStorage.removeItem("brandSnap_user");
+      }
+    }
+  }, []);
+
   // Load leaderboard
   useEffect(() => {
     const loadLeaderboard = async () => {
@@ -101,7 +116,9 @@ export const BrandGuessGame = () => {
   }, [timeLeft, gameState, isAnswered]);
 
   const handleLogin = (name: string, email: string) => {
-    setUser({ name, email });
+    const newUser = { name, email };
+    setUser(newUser);
+    localStorage.setItem("brandSnap_user", JSON.stringify(newUser));
     setGameState("start");
     toast.success(`Welcome ${name}! 🎉`);
   };
@@ -149,22 +166,25 @@ export const BrandGuessGame = () => {
 
   const saveScore = async (finalScore: number) => {
     if (!user) return;
-    
+
     try {
       await addDoc(collection(db, "scores"), {
         name: user.name,
-        email: user.email,
+        email: user.email.toLowerCase().trim(),
         score: finalScore,
         maxScore: questions.length,
         date: new Date().toISOString().split('T')[0],
         timestamp: new Date().toISOString()
       });
+
+
       toast.success("Score saved to leaderboard!");
     } catch (error) {
       console.error("Error saving score:", error);
       toast.error("Failed to save score");
     }
   };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,8 +258,8 @@ export const BrandGuessGame = () => {
                 <p>• 30 seconds per question</p>
                 <p>• Type your answer</p>
               </div>
-              <Button 
-                onClick={startGame} 
+              <Button
+                onClick={startGame}
                 className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
                 size="lg"
               >
@@ -270,8 +290,8 @@ export const BrandGuessGame = () => {
                 </div>
                 <p className="text-muted-foreground">Final Score</p>
               </div>
-              <Button 
-                onClick={resetGame} 
+              <Button
+                onClick={resetGame}
                 className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
                 size="lg"
               >
@@ -313,9 +333,9 @@ export const BrandGuessGame = () => {
           <div className="text-center space-y-6">
             <h2 className="text-xl font-semibold">Which brand is this?</h2>
             <div className="relative w-64 h-64 mx-auto bg-white rounded-lg p-4 shadow-lg">
-              <img 
-                src={question.image} 
-                alt="Brand product" 
+              <img
+                src={question.image}
+                alt="Brand product"
                 className="w-full h-full object-contain rounded"
               />
             </div>
@@ -339,8 +359,8 @@ export const BrandGuessGame = () => {
                 className="text-lg h-12"
               />
             </div>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={!userAnswer.trim() || isAnswered}
               className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
               size="lg"
@@ -349,14 +369,14 @@ export const BrandGuessGame = () => {
               Submit Answer
             </Button>
           </form>
-          
+
           {isAnswered && (
             <div className="mt-4 p-4 rounded-lg bg-muted">
               <p className="text-sm text-muted-foreground">
                 {userAnswer.toLowerCase().trim() && questions[currentQuestion].acceptableAnswers.some(
                   acceptableAnswer => acceptableAnswer.toLowerCase() === userAnswer.toLowerCase().trim()
-                ) 
-                  ? "✅ Correct! Well done!" 
+                )
+                  ? "✅ Correct! Well done!"
                   : `❌ The correct answer was: ${questions[currentQuestion].correctAnswer}`
                 }
               </p>
@@ -380,13 +400,13 @@ export const BrandGuessGame = () => {
                 Leaderboard
               </h2>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex justify-between items-center text-sm text-muted-foreground">
                 <span>REFRESH: 9m : 52s</span>
                 <span>SCORE DATE</span>
               </div>
-              
+
               <Table>
                 <TableHeader>
                   <TableRow className="border-jumia/10">
@@ -448,24 +468,24 @@ export const BrandGuessGame = () => {
 
         <Tabs defaultValue="game" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted">
-            <TabsTrigger 
-              value="game" 
+            <TabsTrigger
+              value="game"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-jumia data-[state=active]:to-jumia-light data-[state=active]:text-white"
             >
               Game
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value="leaderboard"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-jumia data-[state=active]:to-jumia-light data-[state=active]:text-white"
             >
               Leaderboard
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="game" className="mt-0">
             {renderGameContent()}
           </TabsContent>
-          
+
           <TabsContent value="leaderboard" className="mt-0">
             {renderLeaderboard()}
           </TabsContent>
