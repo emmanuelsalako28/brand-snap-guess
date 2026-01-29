@@ -240,13 +240,13 @@ export const BrandGuessGame = () => {
     if (gameState === "start") {
       return (
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
+          <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-primary/20">
             <div className="space-y-4">
-              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-jumia to-jumia-light rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
                 <Trophy className="w-8 h-8 text-white" />
               </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent">
-                Jumia Brand Guess
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Brand Snap
               </h1>
               <p className="text-muted-foreground">
                 Welcome back, {user?.name}! Ready to test your brand knowledge?
@@ -260,7 +260,7 @@ export const BrandGuessGame = () => {
               </div>
               <Button
                 onClick={startGame}
-                className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
+                className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white"
                 size="lg"
               >
                 <Play className="w-4 h-4 mr-2" />
@@ -275,7 +275,7 @@ export const BrandGuessGame = () => {
     if (gameState === "finished") {
       return (
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
+          <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-primary/20">
             <div className="space-y-4">
               <div className="w-20 h-20 mx-auto bg-gradient-to-br from-success to-success/80 rounded-full flex items-center justify-center">
                 <Trophy className="w-10 h-10 text-success-foreground" />
@@ -292,7 +292,7 @@ export const BrandGuessGame = () => {
               </div>
               <Button
                 onClick={resetGame}
-                className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
+                className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white"
                 size="lg"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
@@ -329,7 +329,7 @@ export const BrandGuessGame = () => {
         </div>
 
         {/* Question Card */}
-        <Card className="p-6 mb-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
+        <Card className="p-6 mb-6 bg-gradient-to-br from-card to-card/80 border-primary/20">
           <div className="text-center space-y-6">
             <h2 className="text-xl font-semibold">Which brand is this?</h2>
             <div className="relative w-64 h-64 mx-auto bg-white rounded-lg p-4 shadow-lg">
@@ -343,7 +343,7 @@ export const BrandGuessGame = () => {
         </Card>
 
         {/* Answer Input */}
-        <Card className="p-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
+        <Card className="p-6 bg-gradient-to-br from-card to-card/80 border-primary/20">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="answer" className="text-sm font-medium">
@@ -362,7 +362,7 @@ export const BrandGuessGame = () => {
             <Button
               type="submit"
               disabled={!userAnswer.trim() || isAnswered}
-              className="w-full bg-gradient-to-r from-jumia to-jumia-light hover:from-jumia-dark hover:to-jumia text-white"
+              className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white"
               size="lg"
             >
               <Send className="w-4 h-4 mr-2" />
@@ -390,13 +390,13 @@ export const BrandGuessGame = () => {
   const renderLeaderboard = () => {
     return (
       <div className="max-w-4xl mx-auto">
-        <Card className="bg-gradient-to-br from-card to-card/80 border-jumia/20">
+        <Card className="bg-gradient-to-br from-card to-card/80 border-primary/20">
           <div className="p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-jumia to-jumia-light rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
                 <Crown className="w-5 h-5 text-white" />
               </div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Leaderboard
               </h2>
             </div>
@@ -458,8 +458,8 @@ export const BrandGuessGame = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent mb-2">
-            Jumia Brand Guess
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
+            Brand Snap
           </h1>
           <p className="text-muted-foreground">
             Welcome {user?.name}! Test your brand knowledge
@@ -470,13 +470,13 @@ export const BrandGuessGame = () => {
           <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted">
             <TabsTrigger
               value="game"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-jumia data-[state=active]:to-jumia-light data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
             >
               Game
             </TabsTrigger>
             <TabsTrigger
               value="leaderboard"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-jumia data-[state=active]:to-jumia-light data-[state=active]:text-white"
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-accent data-[state=active]:text-white"
             >
               Leaderboard
             </TabsTrigger>

@@ -16,17 +16,17 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       toast.error("Please enter your name");
       return;
     }
-    
+
     if (!email.trim()) {
       toast.error("Please enter your email");
       return;
     }
-    
+
     if (!/\S+@\S+\.\S+/.test(email)) {
       toast.error("Please enter a valid email address");
       return;
@@ -43,7 +43,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
             <LogIn className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Welcome to Brand Snap Guess
+            Welcome to Brand Snap
           </h1>
           <p className="text-muted-foreground">
             Please enter your details to start playing
@@ -87,7 +87,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
             </div>
           </div>
 
-          <Button 
+          <Button
             type="submit"
             className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
             size="lg"
