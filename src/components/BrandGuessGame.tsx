@@ -132,7 +132,7 @@ export const BrandGuessGame = () => {
       toast.error(`Wrong! The answer was ${questions[currentQuestion].correctAnswer}`);
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (currentQuestion < questions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
         setUserAnswer("");
@@ -140,20 +140,21 @@ export const BrandGuessGame = () => {
         setTimeLeft(30);
       } else {
         // Save score to Firebase
-        saveScore();
+        const finalScore = isCorrect ? score + 1 : score;
+        await saveScore(finalScore);
         setGameState("finished");
       }
     }, 2000);
   };
 
-  const saveScore = async () => {
+  const saveScore = async (finalScore: number) => {
     if (!user) return;
     
     try {
       await addDoc(collection(db, "scores"), {
         name: user.name,
         email: user.email,
-        score: score,
+        score: finalScore,
         maxScore: questions.length,
         date: new Date().toISOString().split('T')[0],
         timestamp: new Date().toISOString()
