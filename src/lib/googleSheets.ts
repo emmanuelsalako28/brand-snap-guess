@@ -4,6 +4,7 @@ export interface SheetQuestion {
   correctAnswer: string;
   acceptableAnswers: string[];
   date: string;
+  questionText: string;
 }
 
 const SHEET_ID = "1eD8qXU3MOaNZoM9E6va4_1FHzzbREQ_cdErbSj34ZLY";
@@ -47,7 +48,8 @@ export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
           acceptableAnswers: row[2]              // Column C: Acceptable Answers
             ? row[2].split(",").map(a => a.trim().toLowerCase())
             : [row[1]?.trim().toLowerCase() || ""],
-          date: row[3]?.trim() || ""             // Column D: Date
+          date: row[3]?.trim() || "",             // Column D: Date
+          questionText: row[4]?.trim() || "Which brand is this?" // Column E: Custom Question
         };
         return q;
       })

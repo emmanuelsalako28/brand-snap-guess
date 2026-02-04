@@ -17,6 +17,7 @@ interface Question {
   image: string;
   correctAnswer: string;
   acceptableAnswers: string[];
+  questionText: string;
 }
 
 type GameState = "login" | "start" | "playing" | "finished";
@@ -331,7 +332,7 @@ export const BrandGuessGame = () => {
         {/* Question Card */}
         <Card className="p-6 mb-6 bg-gradient-to-br from-card to-card/80 border-primary/20">
           <div className="text-center space-y-6">
-            <h2 className="text-xl font-semibold">Which brand is this?</h2>
+            <h2 className="text-xl font-semibold">{question.questionText}</h2>
             <div className="relative w-64 h-64 mx-auto bg-white rounded-lg p-4 shadow-lg">
               <img
                 src={question.image}
