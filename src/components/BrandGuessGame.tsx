@@ -337,8 +337,9 @@ export const BrandGuessGame = () => {
               <img
                 src={question.image}
                 alt="Brand product"
-                className={`w-full h-full object-contain rounded transition-all duration-700 ${!isAnswered ? "blur-2xl scale-110" : "blur-0 scale-100"
+                className={`w-full h-full object-contain rounded transition-all duration-700 ${!isAnswered ? "blur-sm scale-110" : "blur-0 scale-100"
                   }`}
+                style={!isAnswered ? { imageRendering: 'pixelated' } : {}}
               />
             </div>
           </div>
