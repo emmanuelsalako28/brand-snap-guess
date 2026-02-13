@@ -42,7 +42,7 @@ export const BrandGuessGame = () => {
   const [score, setScore] = useState(0);
   const [userAnswer, setUserAnswer] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(15);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(true);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -130,7 +130,7 @@ export const BrandGuessGame = () => {
     setScore(0);
     setUserAnswer("");
     setIsAnswered(false);
-    setTimeLeft(30);
+    setTimeLeft(15);
   };
 
   const handleAnswer = () => {
@@ -155,7 +155,7 @@ export const BrandGuessGame = () => {
         setCurrentQuestion(currentQuestion + 1);
         setUserAnswer("");
         setIsAnswered(false);
-        setTimeLeft(30);
+        setTimeLeft(15);
       } else {
         // Save score to Firebase
         const finalScore = isCorrect ? score + 1 : score;
@@ -200,7 +200,7 @@ export const BrandGuessGame = () => {
     setScore(0);
     setUserAnswer("");
     setIsAnswered(false);
-    setTimeLeft(30);
+    setTimeLeft(15);
   };
 
   const getScoreMessage = () => {
@@ -256,7 +256,7 @@ export const BrandGuessGame = () => {
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground space-y-1">
                 <p>• {questions.length} questions</p>
-                <p>• 30 seconds per question</p>
+                <p>• 15 seconds per question</p>
                 <p>• Type your answer</p>
               </div>
               <Button
