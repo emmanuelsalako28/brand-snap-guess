@@ -45,7 +45,8 @@ export const BrandGuessGame = () => {
   const [timeLeft, setTimeLeft] = useState(15);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(true);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [allQuestions, setAllQuestions] = useState<Question[]>([]);
+  const [gameQuestions, setGameQuestions] = useState<Question[]>([]);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
 
   // Load questions from Google Sheet
@@ -53,7 +54,7 @@ export const BrandGuessGame = () => {
     const loadQuestions = async () => {
       try {
         const sheetQuestions = await fetchQuestionsFromSheet();
-        setQuestions(sheetQuestions);
+        setAllQuestions(sheetQuestions);
       } catch (error) {
         console.error("Error loading questions:", error);
         toast.error("Failed to load questions");
@@ -125,6 +126,16 @@ export const BrandGuessGame = () => {
   };
 
   const startGame = () => {
+    if (allQuestions.length === 0) {
+      toast.error("No questions available to start the game.");
+      return;
+    }
+
+    // Randomly select exactly 5 unique questions
+    const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, 5);
+
+    setGameQuestions(selected);
     setGameState("playing");
     setCurrentQuestion(0);
     setScore(0);
@@ -139,7 +150,7 @@ export const BrandGuessGame = () => {
     setIsAnswered(true);
 
     const userAnswerLower = userAnswer.toLowerCase().trim();
-    const isCorrect = questions[currentQuestion].acceptableAnswers.some(
+    const isCorrect = gameQuestions[currentQuestion].acceptableAnswers.some(
       acceptableAnswer => acceptableAnswer.toLowerCase() === userAnswerLower
     );
 
@@ -147,11 +158,11 @@ export const BrandGuessGame = () => {
       setScore(score + 1);
       toast.success("Correct! 🎉");
     } else {
-      toast.error(`Wrong! The answer was ${questions[currentQuestion].correctAnswer}`);
+      toast.error(`Wrong! The answer was ${gameQuestions[currentQuestion].correctAnswer}`);
     }
 
     setTimeout(async () => {
-      if (currentQuestion < questions.length - 1) {
+      if (currentQuestion < gameQuestions.length - 1) {
         setCurrentQuestion(currentQuestion + 1);
         setUserAnswer("");
         setIsAnswered(false);
@@ -173,7 +184,7 @@ export const BrandGuessGame = () => {
         name: user.name,
         email: user.email.toLowerCase().trim(),
         score: finalScore,
-        maxScore: questions.length,
+        maxScore: gameQuestions.length,
         date: new Date().toISOString().split('T')[0],
         timestamp: new Date().toISOString()
       });
@@ -204,7 +215,7 @@ export const BrandGuessGame = () => {
   };
 
   const getScoreMessage = () => {
-    const percentage = (score / questions.length) * 100;
+    const percentage = (score / gameQuestions.length) * 100;
     if (percentage === 100) return "Perfect! Brand Master! 🏆";
     if (percentage >= 80) return "Excellent! Brand Expert! 🌟";
     if (percentage >= 60) return "Great job! Brand Enthusiast! 👏";
@@ -228,7 +239,7 @@ export const BrandGuessGame = () => {
       );
     }
 
-    if (questions.length === 0) {
+    if (allQuestions.length === 0) {
       return (
         <div className="flex items-center justify-center min-h-[60vh]">
           <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
@@ -255,7 +266,7 @@ export const BrandGuessGame = () => {
             </div>
             <div className="space-y-4">
               <div className="text-sm text-muted-foreground space-y-1">
-                <p>• {questions.length} questions</p>
+                <p>• 5 questions</p>
                 <p>• 15 seconds per question</p>
                 <p>• Type your answer</p>
               </div>
@@ -287,7 +298,7 @@ export const BrandGuessGame = () => {
             <div className="space-y-4">
               <div className="text-center">
                 <div className="text-4xl font-bold bg-gradient-to-r from-jumia to-jumia-light bg-clip-text text-transparent">
-                  {score}/{questions.length}
+                  {score}/{gameQuestions.length}
                 </div>
                 <p className="text-muted-foreground">Final Score</p>
               </div>
@@ -306,8 +317,8 @@ export const BrandGuessGame = () => {
     }
 
     // Playing state
-    const question = questions[currentQuestion];
-    const progress = ((currentQuestion + 1) / questions.length) * 100;
+    const question = gameQuestions[currentQuestion];
+    const progress = ((currentQuestion + 1) / gameQuestions.length) * 100;
 
     return (
       <div className="max-w-2xl mx-auto">
@@ -315,10 +326,10 @@ export const BrandGuessGame = () => {
         <div className="mb-6 space-y-4">
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">
-              Question {currentQuestion + 1} of {questions.length}
+              Question {currentQuestion + 1} of {gameQuestions.length}
             </span>
             <span className="text-sm text-muted-foreground">
-              Score: {score}/{questions.length}
+              Score: {score}/{gameQuestions.length}
             </span>
           </div>
           <Progress value={progress} className="h-2" />
@@ -376,11 +387,11 @@ export const BrandGuessGame = () => {
           {isAnswered && (
             <div className="mt-4 p-4 rounded-lg bg-muted">
               <p className="text-sm text-muted-foreground">
-                {userAnswer.toLowerCase().trim() && questions[currentQuestion].acceptableAnswers.some(
+                {userAnswer.toLowerCase().trim() && gameQuestions[currentQuestion].acceptableAnswers.some(
                   acceptableAnswer => acceptableAnswer.toLowerCase() === userAnswer.toLowerCase().trim()
                 )
                   ? "✅ Correct! Well done!"
-                  : `❌ The correct answer was: ${questions[currentQuestion].correctAnswer}`
+                  : `❌ The correct answer was: ${gameQuestions[currentQuestion].correctAnswer}`
                 }
               </p>
             </div>
