@@ -125,16 +125,18 @@ export const BrandGuessGame = () => {
     toast.success(`Welcome ${name}! 🎉`);
   };
 
-  // Time-based restriction: 10 AM to 6 PM
+  // Time-based restriction: 10 AM to 6 PM, Monday - Friday
   const isGameOpen = () => {
     const now = new Date();
     const hour = now.getHours();
-    return hour >= 10 && hour < 18;
+    const day = now.getDay(); // 0: Sunday, 1: Monday, ..., 5: Friday, 6: Saturday
+    const isWeekday = day >= 1 && day <= 5;
+    return isWeekday && hour >= 10 && hour < 18;
   };
 
   const startGame = () => {
     if (!isGameOpen()) {
-      toast.error("The game is currently closed. Please come back between 10 AM and 6 PM.");
+      toast.error("The game is currently closed. Please come back between 10 AM and 6 PM, Monday to Friday.");
       return;
     }
 
@@ -300,7 +302,7 @@ export const BrandGuessGame = () => {
                   <h3 className="text-xl font-bold text-warning">Game Closed</h3>
                   <p className="text-lg font-medium">Come back tomorrow</p>
                   <p className="text-sm text-muted-foreground">
-                    The game is available daily from <span className="font-bold text-foreground">10:00 AM to 6:00 PM</span>.
+                    The game is available <span className="font-bold text-foreground">Monday - Friday</span> from <span className="font-bold text-foreground">10:00 AM to 6:00 PM</span>.
                   </p>
                 </div>
                 <Button
