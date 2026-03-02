@@ -35,14 +35,15 @@ export const AdminWinners = () => {
     const [winners, setWinners] = useState<Winner[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
-    const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0]);
+    const [dateFilter, setDateFilter] = useState(""); // Default to empty string to show all results
 
     const fetchWinners = async () => {
         setIsLoading(true);
         try {
-            // Fetch scores where score is equal to maxScore (perfect scorers)
+            // Fetch all scores
             const q = query(
                 collection(db, "scores"),
+                orderBy("score", "desc"),
                 orderBy("timestamp", "desc")
             );
 
@@ -51,18 +52,16 @@ export const AdminWinners = () => {
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                // A winner is someone with a perfect score
-                if (data.score === data.maxScore && data.score > 0) {
-                    allWinners.push({
-                        id: doc.id,
-                        name: data.name || "Anonymous",
-                        email: data.email || "No Email",
-                        score: data.score,
-                        maxScore: data.maxScore,
-                        date: data.date,
-                        timestamp: data.timestamp
-                    });
-                }
+                // We show all players who have played, but clearly mark the "Winners" (perfect scores)
+                allWinners.push({
+                    id: doc.id,
+                    name: data.name || "Anonymous",
+                    email: data.email || "No Email",
+                    score: data.score,
+                    maxScore: data.maxScore,
+                    date: data.date,
+                    timestamp: data.timestamp
+                });
             });
 
             setWinners(allWinners);
@@ -170,6 +169,7 @@ export const AdminWinners = () => {
                         <Table>
                             <TableHeader className="bg-muted/50">
                                 <TableRow>
+                                    <TableHead className="w-[80px] text-center">Rank</TableHead>
                                     <TableHead className="w-[200px]">Name</TableHead>
                                     <TableHead>Email</TableHead>
                                     <TableHead className="text-center">Score</TableHead>
@@ -179,26 +179,34 @@ export const AdminWinners = () => {
                             <TableBody>
                                 {isLoading ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="h-64 text-center">
+                                        <TableCell colSpan={5} className="h-64 text-center">
                                             <div className="flex flex-col items-center justify-center gap-2">
                                                 <RefreshCw className="h-8 w-8 animate-spin text-jumia" />
-                                                <span className="text-muted-foreground">Fetching winners...</span>
+                                                <span className="text-muted-foreground">Fetching players...</span>
                                             </div>
                                         </TableCell>
                                     </TableRow>
                                 ) : filteredWinners.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="h-64 text-center text-muted-foreground font-medium">
-                                            No winners found for the selected criteria.
+                                        <TableCell colSpan={5} className="h-64 text-center text-muted-foreground font-medium">
+                                            No players found for the selected criteria.
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    filteredWinners.map((winner) => (
-                                        <TableRow key={winner.id} className="hover:bg-jumia/5 transition-colors">
-                                            <TableCell className="font-semibold">{winner.name}</TableCell>
+                                    filteredWinners.map((winner, index) => (
+                                        <TableRow key={winner.id} className={`hover:bg-jumia/5 transition-colors ${winner.score === winner.maxScore ? 'bg-jumia/5 font-medium' : ''}`}>
+                                            <TableCell className="text-center font-bold text-muted-foreground">
+                                                #{index + 1}
+                                            </TableCell>
+                                            <TableCell className="font-semibold flex items-center gap-2">
+                                                {winner.name}
+                                                {winner.score === winner.maxScore && (
+                                                    <Trophy className="w-4 h-4 text-yellow-500" />
+                                                )}
+                                            </TableCell>
                                             <TableCell className="font-mono text-sm">{winner.email}</TableCell>
                                             <TableCell className="text-center">
-                                                <span className="px-2.5 py-0.5 rounded-full bg-jumia/10 text-jumia font-bold">
+                                                <span className={`px-2.5 py-0.5 rounded-full font-bold ${winner.score === winner.maxScore ? 'bg-jumia text-white' : 'bg-jumia/10 text-jumia'}`}>
                                                     {winner.score}/{winner.maxScore}
                                                 </span>
                                             </TableCell>
