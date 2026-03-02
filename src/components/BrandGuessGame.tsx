@@ -42,6 +42,7 @@ export const BrandGuessGame = () => {
   const [score, setScore] = useState(0);
   const [userAnswer, setUserAnswer] = useState("");
   const [isAnswered, setIsAnswered] = useState(false);
+  const [answerStatus, setAnswerStatus] = useState<"correct" | "wrong" | "timeout" | null>(null);
   const [timeLeft, setTimeLeft] = useState(15);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(true);
@@ -155,6 +156,7 @@ export const BrandGuessGame = () => {
     setScore(0);
     setUserAnswer("");
     setIsAnswered(false);
+    setAnswerStatus(null);
     setTimeLeft(15);
   };
 
@@ -164,16 +166,23 @@ export const BrandGuessGame = () => {
     setIsAnswered(true);
 
     const userAnswerLower = userAnswer.toLowerCase().trim();
-    // If it's a timeout, it's always incorrect regardless of the input
-    const isCorrect = !isTimeout && gameQuestions[currentQuestion].acceptableAnswers.some(
+    const isActuallyCorrect = gameQuestions[currentQuestion].acceptableAnswers.some(
       acceptableAnswer => acceptableAnswer.toLowerCase() === userAnswerLower
     );
 
+    // If it's a timeout, it's always incorrect regardless of the input
+    const isCorrect = !isTimeout && isActuallyCorrect;
+
     if (isCorrect) {
+      setAnswerStatus("correct");
       setScore(s => s + 1);
       toast.success("Correct! 🎉");
+    } else if (isTimeout) {
+      setAnswerStatus("timeout");
+      toast.error("Time's up! ⏰");
     } else {
-      toast.error(isTimeout ? "Time's up! ⏰" : `Wrong! The answer was ${gameQuestions[currentQuestion].correctAnswer}`);
+      setAnswerStatus("wrong");
+      toast.error("Wrong! ❌");
     }
 
     setTimeout(async () => {
@@ -181,18 +190,9 @@ export const BrandGuessGame = () => {
         setCurrentQuestion(prev => prev + 1);
         setUserAnswer("");
         setIsAnswered(false);
+        setAnswerStatus(null);
         setTimeLeft(15);
       } else {
-        // We need the final score to save it. 
-        // Since setScore is async, we use the value we just calculated.
-        setScore(currentScore => {
-          const finalScore = isCorrect ? currentScore : currentScore;
-          // Note: score + 1 was already queued if isCorrect was true.
-          // In this closure, 'score' is the value from the render.
-          // To be safe and avoid extra points, let's just use the current score state in saveScore.
-          return currentScore;
-        });
-
         const finalTotal = isCorrect ? score + 1 : score;
         await saveScore(finalTotal);
         setGameState("finished");
@@ -235,6 +235,7 @@ export const BrandGuessGame = () => {
     setScore(0);
     setUserAnswer("");
     setIsAnswered(false);
+    setAnswerStatus(null);
     setTimeLeft(15);
   };
 
@@ -433,9 +434,7 @@ export const BrandGuessGame = () => {
           {isAnswered && (
             <div className="mt-4 p-4 rounded-lg bg-muted">
               <p className="text-sm text-muted-foreground">
-                {userAnswer.toLowerCase().trim() && gameQuestions[currentQuestion].acceptableAnswers.some(
-                  acceptableAnswer => acceptableAnswer.toLowerCase() === userAnswer.toLowerCase().trim()
-                )
+                {answerStatus === "correct"
                   ? "✅ Correct! Well done!"
                   : `❌ The correct answer was: ${gameQuestions[currentQuestion].correctAnswer}`
                 }
