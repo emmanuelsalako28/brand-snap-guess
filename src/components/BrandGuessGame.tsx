@@ -140,6 +140,14 @@ export const BrandGuessGame = () => {
     }
   }, [timeLeft, gameState, isAnswered]);
 
+  const getUtmUrl = (url: string, medium: "brands" | "games" | "ads" | "search") => {
+    const baseUrl = new URL(url);
+    baseUrl.searchParams.set("utm_source", "ecatalog");
+    baseUrl.searchParams.set("utm_medium", medium);
+    baseUrl.searchParams.set("utm_campaign", "brand-snap");
+    return baseUrl.toString();
+  };
+
   const handleLogin = (name: string, email: string) => {
     const newUser = { name, email };
     setUser(newUser);
@@ -168,7 +176,7 @@ export const BrandGuessGame = () => {
       return;
     }
 
-    // Randomly select exactly 5 unique questions
+    // Shuffle and pick exactly 5 questions from the date-filtered set
     const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 5);
 
@@ -328,6 +336,16 @@ export const BrandGuessGame = () => {
                   <Play className="w-4 h-4 mr-2" />
                   Start Game
                 </Button>
+                <div className="pt-4 border-t border-primary/10">
+                  <a
+                    href={getUtmUrl("https://www.jumia.com.ng/catalog/", "games")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-primary hover:underline flex items-center justify-center gap-1"
+                  >
+                    Explore More Games
+                  </a>
+                </div>
               </div>
             ) : (
               <div className="space-y-4 p-6 bg-muted/50 rounded-xl border border-warning/20">
@@ -338,14 +356,24 @@ export const BrandGuessGame = () => {
                     The game is available <span className="font-bold text-foreground">Monday - Friday</span> from <span className="font-bold text-foreground">10:00 AM to 6:00 PM</span>.
                   </p>
                 </div>
-                <Button
-                  disabled
-                  className="w-full opacity-50 grayscale"
-                  size="lg"
-                >
-                  <Loader2 className="w-4 h-4 mr-2" />
-                  Closed
-                </Button>
+                <div className="space-y-3">
+                  <Button
+                    disabled
+                    className="w-full opacity-50 grayscale"
+                    size="lg"
+                  >
+                    <Loader2 className="w-4 h-4 mr-2" />
+                    Closed
+                  </Button>
+                  <a
+                    href={getUtmUrl("https://www.jumia.com.ng/", "ads")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-sm text-muted-foreground hover:text-primary transition-colors underline"
+                  >
+                    Visit our e-catalog while you wait
+                  </a>
+                </div>
               </div>
             )}
           </Card>
@@ -454,7 +482,7 @@ export const BrandGuessGame = () => {
           </form>
 
           {isAnswered && (
-            <div className="mt-4 p-4 rounded-lg bg-muted text-center">
+            <div className="mt-4 p-4 rounded-lg bg-muted text-center space-y-3">
               <p className="text-lg font-semibold">
                 {answerStatus === "correct"
                   ? "✅ Correct! Well done!"
@@ -463,6 +491,24 @@ export const BrandGuessGame = () => {
                     : "❌ Incorrect! Better luck next time."
                 }
               </p>
+              <div className="flex flex-col gap-2 pt-2 border-t border-muted-foreground/10">
+                <a
+                  href={getUtmUrl(`https://www.jumia.com.ng/catalog/?q=${gameQuestions[currentQuestion].correctAnswer}`, "brands")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-1"
+                >
+                  Shop this Brand in Catalog
+                </a>
+                <a
+                  href={getUtmUrl("https://www.jumia.com.ng/", "search")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Browse all Brands
+                </a>
+              </div>
             </div>
           )}
         </Card>
