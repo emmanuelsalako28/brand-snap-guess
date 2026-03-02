@@ -40,19 +40,14 @@ export const AdminWinners = () => {
     const fetchWinners = async () => {
         setIsLoading(true);
         try {
-            // Fetch all scores
-            const q = query(
-                collection(db, "scores"),
-                orderBy("score", "desc"),
-                orderBy("timestamp", "desc")
-            );
+            // Fetch scores without complex ordering to avoid index requirements
+            const q = query(collection(db, "scores"));
 
             const querySnapshot = await getDocs(q);
             const allWinners: Winner[] = [];
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                // We show all players who have played, but clearly mark the "Winners" (perfect scores)
                 allWinners.push({
                     id: doc.id,
                     name: data.name || "Anonymous",
@@ -62,6 +57,14 @@ export const AdminWinners = () => {
                     date: data.date,
                     timestamp: data.timestamp
                 });
+            });
+
+            // Sort in memory by score (desc) and then timestamp (desc)
+            allWinners.sort((a, b) => {
+                if (b.score !== a.score) {
+                    return b.score - a.score;
+                }
+                return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
             });
 
             setWinners(allWinners);
