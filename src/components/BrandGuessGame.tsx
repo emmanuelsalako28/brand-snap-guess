@@ -125,7 +125,19 @@ export const BrandGuessGame = () => {
     toast.success(`Welcome ${name}! 🎉`);
   };
 
+  // Time-based restriction: 10 AM to 6 PM
+  const isGameOpen = () => {
+    const now = new Date();
+    const hour = now.getHours();
+    return hour >= 10 && hour < 18;
+  };
+
   const startGame = () => {
+    if (!isGameOpen()) {
+      toast.error("The game is currently closed. Please come back between 10 AM and 6 PM.");
+      return;
+    }
+
     if (allQuestions.length === 0) {
       toast.error("No questions available to start the game.");
       return;
@@ -250,6 +262,7 @@ export const BrandGuessGame = () => {
     }
 
     if (gameState === "start") {
+      const open = isGameOpen();
       return (
         <div className="flex items-center justify-center min-h-[60vh]">
           <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-primary/20">
@@ -264,21 +277,42 @@ export const BrandGuessGame = () => {
                 Welcome back, {user?.name}! Ready to test your brand knowledge?
               </p>
             </div>
-            <div className="space-y-4">
-              <div className="text-sm text-muted-foreground space-y-1">
-                <p>• 5 questions</p>
-                <p>• 15 seconds per question</p>
-                <p>• Type your answer</p>
+
+            {open ? (
+              <div className="space-y-4">
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <p>• 5 questions</p>
+                  <p>• 15 seconds per question</p>
+                  <p>• Type your answer</p>
+                </div>
+                <Button
+                  onClick={startGame}
+                  className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white"
+                  size="lg"
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Start Game
+                </Button>
               </div>
-              <Button
-                onClick={startGame}
-                className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white"
-                size="lg"
-              >
-                <Play className="w-4 h-4 mr-2" />
-                Start Game
-              </Button>
-            </div>
+            ) : (
+              <div className="space-y-4 p-6 bg-muted/50 rounded-xl border border-warning/20">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-warning">Game Closed</h3>
+                  <p className="text-lg font-medium">Come back tomorrow</p>
+                  <p className="text-sm text-muted-foreground">
+                    The game is available daily from <span className="font-bold text-foreground">10:00 AM to 6:00 PM</span>.
+                  </p>
+                </div>
+                <Button
+                  disabled
+                  className="w-full opacity-50 grayscale"
+                  size="lg"
+                >
+                  <Loader2 className="w-4 h-4 mr-2" />
+                  Closed
+                </Button>
+              </div>
+            )}
           </Card>
         </div>
       );
