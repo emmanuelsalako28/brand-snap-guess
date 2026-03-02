@@ -338,7 +338,7 @@ export const BrandGuessGame = () => {
                 </Button>
                 <div className="pt-4 border-t border-primary/10">
                   <a
-                    href={getUtmUrl("https://www.jumia.com.ng/catalog/", "games")}
+                    href={getUtmUrl("https://www.jumia.com.ng/sp-jumia-catalog/", "games")}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-primary hover:underline flex items-center justify-center gap-1"
@@ -366,7 +366,7 @@ export const BrandGuessGame = () => {
                     Closed
                   </Button>
                   <a
-                    href={getUtmUrl("https://www.jumia.com.ng/", "ads")}
+                    href={getUtmUrl("https://www.jumia.com.ng/sp-jumia-catalog/", "ads")}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block text-sm text-muted-foreground hover:text-primary transition-colors underline"
@@ -491,7 +491,7 @@ export const BrandGuessGame = () => {
               </p>
               <div className="flex flex-col gap-2 pt-2 border-t border-muted-foreground/10">
                 <a
-                  href={getUtmUrl(`https://www.jumia.com.ng/catalog/?q=${gameQuestions[currentQuestion].correctAnswer}`, "brands")}
+                  href={getUtmUrl(`https://www.jumia.com.ng/sp-jumia-catalog/?q=${gameQuestions[currentQuestion].correctAnswer}`, "brands")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center justify-center gap-1"
