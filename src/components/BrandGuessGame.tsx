@@ -432,11 +432,13 @@ export const BrandGuessGame = () => {
           </form>
 
           {isAnswered && (
-            <div className="mt-4 p-4 rounded-lg bg-muted">
-              <p className="text-sm text-muted-foreground">
+            <div className="mt-4 p-4 rounded-lg bg-muted text-center">
+              <p className="text-lg font-semibold">
                 {answerStatus === "correct"
                   ? "✅ Correct! Well done!"
-                  : `❌ The correct answer was: ${gameQuestions[currentQuestion].correctAnswer}`
+                  : answerStatus === "timeout"
+                    ? "⏰ Time's up! Try the next one."
+                    : "❌ Incorrect! Better luck next time."
                 }
               </p>
             </div>
