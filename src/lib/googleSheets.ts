@@ -25,47 +25,48 @@ export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
     // Skip header row (first row)
     const dataRows = rows.slice(1);
 
-    // Get today's date in M/D/YYYY format (e.g., 1/29/2026)
-    const now = new Date();
-    const day = now.getDate();
-    const month = now.getMonth() + 1;
-    const year = now.getFullYear();
-    const today = `${month}/${day}/${year}`;
+    // Normalize a date string for comparison: handle M/D/YYYY and padding
+    const normalizeDate = (d: string) => {
+      if (!d) return "";
+      // Remove all whitespace and split by common separators
+      const parts = d.trim().replace(/\s+/g, '').split(/[-/]/);
+      if (parts.length !== 3) return d.trim();
 
-    // Normalize a date string for comparison
-    const normalizeDate = (d: string) => d.trim().replace(/\//g, '-').replace(/\s+/g, '');
+      // Ensure M/D/YYYY format with no leading zeros
+      const m = parseInt(parts[0], 10);
+      const d_part = parseInt(parts[1], 10);
+      const y = parts[2];
+      return `${m}/${d_part}/${y}`;
+    };
+
+    const now = new Date();
+    const today = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
     const normalizedToday = normalizeDate(today);
 
     console.log("DEBUG: Target Date (Normalized):", `[${normalizedToday}]`);
-    console.log("DEBUG: Total data rows fetched:", dataRows.length);
 
-    const questions: SheetQuestion[] = dataRows
-      .map((row, index) => {
-        const q = {
-          id: index + 1,
-          image: row[0]?.trim() || "",           // Column A: Image URL
-          correctAnswer: row[1]?.trim() || "",   // Column B: Correct Answer
-          acceptableAnswers: row[2]              // Column C: Acceptable Answers
-            ? row[2].split(",").map(a => a.trim().toLowerCase())
-            : [row[1]?.trim().toLowerCase() || ""],
-          date: row[3]?.trim() || "",             // Column D: Date
-          questionText: row[4]?.trim() || "Which brand is this?" // Column E: Custom Question
-        };
-        return q;
-      })
-      .filter(q => {
-        const normalizedCardDate = normalizeDate(q.date);
-        const isMatch = normalizedCardDate === normalizedToday;
+    const allQuestions: SheetQuestion[] = dataRows
+      .map((row, index) => ({
+        id: index + 1,
+        image: row[0]?.trim() || "",           // Column A: Image URL
+        correctAnswer: row[1]?.trim() || "",   // Column B: Correct Answer
+        acceptableAnswers: row[2]              // Column C: Acceptable Answers
+          ? row[2].split(",").map(a => a.trim().toLowerCase())
+          : [row[1]?.trim().toLowerCase() || ""],
+        date: row[3]?.trim() || "",             // Column D: Date
+        questionText: row[4]?.trim() || "Which brand is this?" // Column E: Custom Question
+      }))
+      .filter(q => q.image && q.correctAnswer);
 
-        if (q.image || q.date) {
-          console.log(`DEBUG: Row ${q.id} - Date in Sheet: [${q.date}] -> Normalized: [${normalizedCardDate}] vs Target: [${normalizedToday}] | Match: ${isMatch}`);
-        }
+    // Filter for today's questions
+    const todayQuestions = allQuestions.filter(q => normalizeDate(q.date) === normalizedToday);
 
-        return isMatch && q.image && q.correctAnswer;
-      });
+    console.log(`DEBUG: Total valid questions: ${allQuestions.length}`);
+    console.log(`DEBUG: Today's questions: ${todayQuestions.length}`);
 
-    console.log("DEBUG: Filtered questions count:", questions.length);
-    return questions;
+    // If we have at least 5 for today, return them. 
+    // Otherwise return everything so the game can pick 5 random ones.
+    return todayQuestions.length >= 5 ? todayQuestions : allQuestions;
   } catch (error) {
     console.error("Error fetching questions from Google Sheet:", error);
     return [];
