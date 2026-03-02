@@ -16,7 +16,8 @@ const Admin = () => {
     useEffect(() => {
         // Only check Firebase Auth for admin access
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user && ALLOWED_ADMINS.includes(user.email || "")) {
+            const userEmail = user?.email?.toLowerCase().trim() || "";
+            if (user && ALLOWED_ADMINS.includes(userEmail)) {
                 setIsAdmin(true);
                 setUser(user);
             } else {

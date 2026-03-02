@@ -23,7 +23,8 @@ export const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
         setIsLoading(true);
 
         try {
-            if (!ALLOWED_ADMINS.includes(email.toLowerCase().trim())) {
+            const inputEmail = email.toLowerCase().trim();
+            if (!ALLOWED_ADMINS.includes(inputEmail)) {
                 toast.error("You do not have administrative access.");
                 setIsLoading(false);
                 return;
