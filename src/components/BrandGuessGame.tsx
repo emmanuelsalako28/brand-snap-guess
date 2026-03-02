@@ -113,7 +113,7 @@ export const BrandGuessGame = () => {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && !isAnswered) {
-      handleAnswer();
+      handleAnswer(true);
     }
   }, [timeLeft, gameState, isAnswered]);
 
@@ -158,33 +158,43 @@ export const BrandGuessGame = () => {
     setTimeLeft(15);
   };
 
-  const handleAnswer = () => {
+  const handleAnswer = (isTimeout = false) => {
     if (isAnswered) return;
 
     setIsAnswered(true);
 
     const userAnswerLower = userAnswer.toLowerCase().trim();
-    const isCorrect = gameQuestions[currentQuestion].acceptableAnswers.some(
+    // If it's a timeout, it's always incorrect regardless of the input
+    const isCorrect = !isTimeout && gameQuestions[currentQuestion].acceptableAnswers.some(
       acceptableAnswer => acceptableAnswer.toLowerCase() === userAnswerLower
     );
 
     if (isCorrect) {
-      setScore(score + 1);
+      setScore(s => s + 1);
       toast.success("Correct! 🎉");
     } else {
-      toast.error(`Wrong! The answer was ${gameQuestions[currentQuestion].correctAnswer}`);
+      toast.error(isTimeout ? "Time's up! ⏰" : `Wrong! The answer was ${gameQuestions[currentQuestion].correctAnswer}`);
     }
 
     setTimeout(async () => {
       if (currentQuestion < gameQuestions.length - 1) {
-        setCurrentQuestion(currentQuestion + 1);
+        setCurrentQuestion(prev => prev + 1);
         setUserAnswer("");
         setIsAnswered(false);
         setTimeLeft(15);
       } else {
-        // Save score to Firebase
-        const finalScore = isCorrect ? score + 1 : score;
-        await saveScore(finalScore);
+        // We need the final score to save it. 
+        // Since setScore is async, we use the value we just calculated.
+        setScore(currentScore => {
+          const finalScore = isCorrect ? currentScore : currentScore;
+          // Note: score + 1 was already queued if isCorrect was true.
+          // In this closure, 'score' is the value from the render.
+          // To be safe and avoid extra points, let's just use the current score state in saveScore.
+          return currentScore;
+        });
+
+        const finalTotal = isCorrect ? score + 1 : score;
+        await saveScore(finalTotal);
         setGameState("finished");
       }
     }, 2000);
