@@ -88,17 +88,39 @@ export const BrandGuessGame = () => {
         const q = query(
           collection(db, "scores"),
           orderBy("score", "desc"),
-          limit(10)
+          limit(50) // Fetch more to allow for deduplication
         );
         const querySnapshot = await getDocs(q);
-        const scores: LeaderboardEntry[] = querySnapshot.docs.map((doc, index) => ({
-          id: index + 1,
-          name: doc.data().name,
-          score: doc.data().score,
-          maxScore: doc.data().maxScore,
-          date: doc.data().date
-        }));
-        setLeaderboard(scores);
+
+        // Use a Map to keep only the highest score for each email
+        const uniqueScores = new Map<string, LeaderboardEntry>();
+
+        querySnapshot.docs.forEach((doc) => {
+          const data = doc.data();
+          const email = data.email.toLowerCase().trim();
+          const existingEntry = uniqueScores.get(email);
+
+          if (!existingEntry || data.score > existingEntry.score) {
+            uniqueScores.set(email, {
+              id: 0, // Placeholder, will set correct index after sorting
+              name: data.name,
+              score: data.score,
+              maxScore: data.maxScore,
+              date: data.date
+            });
+          }
+        });
+
+        // Convert Map to array, sort by score desc, and take top 10
+        const sortedScores = Array.from(uniqueScores.values())
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 10)
+          .map((entry, index) => ({
+            ...entry,
+            id: index + 1
+          }));
+
+        setLeaderboard(sortedScores);
       } catch (error) {
         console.error("Error loading leaderboard:", error);
       } finally {
