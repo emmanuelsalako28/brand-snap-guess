@@ -49,6 +49,8 @@ export const BrandGuessGame = () => {
   const [allQuestions, setAllQuestions] = useState<Question[]>([]);
   const [gameQuestions, setGameQuestions] = useState<Question[]>([]);
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true);
+  const [playsToday, setPlaysToday] = useState(0);
+  const [isCheckingLimit, setIsCheckingLimit] = useState(false);
 
   // Load questions from Google Sheet
   useEffect(() => {
@@ -80,6 +82,32 @@ export const BrandGuessGame = () => {
       }
     }
   }, []);
+
+  // Check play count for today
+  useEffect(() => {
+    const checkPlayCount = async () => {
+      if (!user) return;
+      setIsCheckingLimit(true);
+      try {
+        const today = new Date().toISOString().split('T')[0];
+        const q = query(
+          collection(db, "scores"),
+          where("email", "==", user.email.toLowerCase().trim()),
+          where("date", "==", today)
+        );
+        const querySnapshot = await getDocs(q);
+        setPlaysToday(querySnapshot.size);
+      } catch (error) {
+        console.error("Error checking play count:", error);
+      } finally {
+        setIsCheckingLimit(false);
+      }
+    };
+
+    if (user && gameState === "start") {
+      checkPlayCount();
+    }
+  }, [user, gameState]);
 
   // Load leaderboard
   useEffect(() => {
@@ -176,6 +204,11 @@ export const BrandGuessGame = () => {
       return;
     }
 
+    if (playsToday >= 2) {
+      toast.error("You have reached your daily limit of 2 plays. Please come back tomorrow!");
+      return;
+    }
+
     // Shuffle and pick up to 5 questions from the date-filtered set
     const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 5);
@@ -244,6 +277,7 @@ export const BrandGuessGame = () => {
       });
 
 
+      setPlaysToday(prev => prev + 1);
       toast.success("Score saved to leaderboard!");
     } catch (error) {
       console.error("Error saving score:", error);
@@ -332,10 +366,20 @@ export const BrandGuessGame = () => {
                   onClick={startGame}
                   className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white"
                   size="lg"
+                  disabled={playsToday >= 2 || isCheckingLimit}
                 >
-                  <Play className="w-4 h-4 mr-2" />
-                  Start Game
+                  {isCheckingLimit ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Play className="w-4 h-4 mr-2" />
+                  )}
+                  {playsToday >= 2 ? "Daily Limit Reached" : "Start Game"}
                 </Button>
+                {playsToday >= 2 && (
+                  <p className="text-sm text-destructive font-medium">
+                    You've played {playsToday} times today. Come back tomorrow!
+                  </p>
+                )}
                 <div className="pt-4 border-t border-primary/10">
                   <a
                     href={getUtmUrl("https://www.jumia.com.ng/sp-jumia-catalog/", "games")}
