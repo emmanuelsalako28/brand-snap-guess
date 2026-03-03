@@ -176,7 +176,7 @@ export const BrandGuessGame = () => {
       return;
     }
 
-    // Shuffle and pick exactly 5 questions from the date-filtered set
+    // Shuffle and pick up to 5 questions from the date-filtered set
     const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
     const selected = shuffled.slice(0, 5);
 

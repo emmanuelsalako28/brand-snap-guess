@@ -64,9 +64,8 @@ export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
     console.log(`DEBUG: Total valid questions: ${allQuestions.length}`);
     console.log(`DEBUG: Today's questions: ${todayQuestions.length}`);
 
-    // If we have at least 5 for today, return them. 
-    // Otherwise return everything so the game can pick 5 random ones.
-    return todayQuestions.length >= 5 ? todayQuestions : allQuestions;
+    // Return only today's questions
+    return todayQuestions;
   } catch (error) {
     console.error("Error fetching questions from Google Sheet:", error);
     return [];
