@@ -11,8 +11,8 @@ const SHEET_ID = "1eD8qXU3MOaNZoM9E6va4_1FHzzbREQ_cdErbSj34ZLY";
 
 export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
   try {
-    // Fetch as CSV (works for public sheets)
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+    // Fetch as CSV (works for public sheets) with cache-buster
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0&t=${Date.now()}`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -25,41 +25,33 @@ export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
     // Skip header row (first row)
     const dataRows = rows.slice(1);
 
-    // Normalize a date string for comparison to YYYY-MM-DD
-    const normalizeDate = (d: string) => {
-      if (!d) return "";
-      // Remove all whitespace and split by common separators
-      const parts = d.trim().replace(/\s+/g, '').split(/[-/]/);
-      if (parts.length !== 3) return d.trim();
+    const now = new Date();
+    const tDay = now.getDate();
+    const tMonth = now.getMonth() + 1;
+    const tYear = now.getFullYear();
 
-      let day, month, year;
+    // Flexible date matcher for "today"
+    const isToday = (dateStr: string) => {
+      if (!dateStr) return false;
+      // Split by common separators: / - .
+      const parts = dateStr.trim().replace(/\s+/g, '').split(/[-/.]/);
+      if (parts.length !== 3) return false;
+
       const p0 = parseInt(parts[0], 10);
       const p1 = parseInt(parts[1], 10);
-      const p2 = parts[2];
+      const p2 = parseInt(parts[2], 10);
+      const y = p2 < 100 ? 2000 + p2 : p2;
 
-      // Heuristic to handle both DD/MM/YYYY and MM/DD/YYYY
-      if (p0 > 12) {
-        // Must be DD/MM/YYYY
-        day = p0;
-        month = p1;
-      } else if (p1 > 12) {
-        // Must be MM/DD/YYYY
-        day = p1;
-        month = p0;
-      } else {
-        // Ambiguous, assume DD/MM/YYYY based on user's current format
-        day = p0;
-        month = p1;
-      }
+      if (y !== tYear) return false;
 
-      year = p2.length === 2 ? `20${p2}` : p2;
-      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      // Check if p0/p1 matches either Month/Day or Day/Month
+      const matchDMY = (p0 === tDay && p1 === tMonth);
+      const matchMDY = (p0 === tMonth && p1 === tDay);
+
+      return matchDMY || matchMDY;
     };
 
-    const now = new Date();
-    const normalizedToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-
-    console.log("DEBUG: Target Date (Normalized):", `[${normalizedToday}]`);
+    console.log(`DEBUG: Today is ${tYear}-${tMonth}-${tDay}`);
 
     const allQuestions: SheetQuestion[] = dataRows
       .map((row, index) => ({
@@ -74,14 +66,11 @@ export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
       }))
       .filter(q => q.image && q.correctAnswer);
 
-    // Filter for today's questions
-    const todayQuestions = allQuestions.filter(q => {
-      const qDate = normalizeDate(q.date);
-      return qDate === normalizedToday;
-    });
+    // Filter for today's questions using robust matcher
+    const todayQuestions = allQuestions.filter(q => isToday(q.date));
 
-    console.log(`DEBUG: Total valid questions: ${allQuestions.length}`);
-    console.log(`DEBUG: Today's questions: ${todayQuestions.length}`);
+    console.log(`DEBUG: Total valid rows: ${allQuestions.length}`);
+    console.log(`DEBUG: Today's matches: ${todayQuestions.length}`);
 
     // Return only today's questions
     return todayQuestions;
