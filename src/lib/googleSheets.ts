@@ -25,23 +25,39 @@ export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
     // Skip header row (first row)
     const dataRows = rows.slice(1);
 
-    // Normalize a date string for comparison: handle M/D/YYYY and padding
+    // Normalize a date string for comparison to YYYY-MM-DD
     const normalizeDate = (d: string) => {
       if (!d) return "";
       // Remove all whitespace and split by common separators
       const parts = d.trim().replace(/\s+/g, '').split(/[-/]/);
       if (parts.length !== 3) return d.trim();
 
-      // Ensure M/D/YYYY format with no leading zeros
-      const m = parseInt(parts[0], 10);
-      const d_part = parseInt(parts[1], 10);
-      const y = parts[2];
-      return `${m}/${d_part}/${y}`;
+      let day, month, year;
+      const p0 = parseInt(parts[0], 10);
+      const p1 = parseInt(parts[1], 10);
+      const p2 = parts[2];
+
+      // Heuristic to handle both DD/MM/YYYY and MM/DD/YYYY
+      if (p0 > 12) {
+        // Must be DD/MM/YYYY
+        day = p0;
+        month = p1;
+      } else if (p1 > 12) {
+        // Must be MM/DD/YYYY
+        day = p1;
+        month = p0;
+      } else {
+        // Ambiguous, assume DD/MM/YYYY based on user's current format
+        day = p0;
+        month = p1;
+      }
+
+      year = p2.length === 2 ? `20${p2}` : p2;
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     };
 
     const now = new Date();
-    const today = `${now.getMonth() + 1}/${now.getDate()}/${now.getFullYear()}`;
-    const normalizedToday = normalizeDate(today);
+    const normalizedToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
     console.log("DEBUG: Target Date (Normalized):", `[${normalizedToday}]`);
 
@@ -59,7 +75,10 @@ export async function fetchQuestionsFromSheet(): Promise<SheetQuestion[]> {
       .filter(q => q.image && q.correctAnswer);
 
     // Filter for today's questions
-    const todayQuestions = allQuestions.filter(q => normalizeDate(q.date) === normalizedToday);
+    const todayQuestions = allQuestions.filter(q => {
+      const qDate = normalizeDate(q.date);
+      return qDate === normalizedToday;
+    });
 
     console.log(`DEBUG: Total valid questions: ${allQuestions.length}`);
     console.log(`DEBUG: Today's questions: ${todayQuestions.length}`);
