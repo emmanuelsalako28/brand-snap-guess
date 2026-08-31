@@ -54,7 +54,7 @@ export const AdminLogin = ({ onLoginSuccess }: AdminLoginProps) => {
                         Enter your credentials to access the winners portal
                     </CardDescription>
                 </CardHeader>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} noValidate>
                     <CardContent className="space-y-4">
                         <div className="space-y-2">
                             <div className="relative">

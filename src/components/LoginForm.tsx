@@ -22,17 +22,19 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
       return;
     }
 
-    if (!email.trim()) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
       toast.error("Please enter your email");
       return;
     }
 
-    if (!/\S+@\S+\.\S+/.test(email)) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
       toast.error("Please enter a valid email address");
       return;
     }
 
-    onLogin(name.trim(), email.trim());
+    onLogin(name.trim(), trimmedEmail);
   };
 
   return (
@@ -50,7 +52,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium">
               Name
