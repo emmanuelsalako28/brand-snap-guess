@@ -43,7 +43,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
             <LogIn className="w-8 h-8 text-primary-foreground" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Welcome to Brand Snap
+            Welcome to Guess the Brand
           </h1>
           <p className="text-muted-foreground">
             Please enter your details to start playing

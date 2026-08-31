@@ -70,7 +70,7 @@ export const BrandGuessGame = () => {
 
   // Persistent Login: Check for saved user on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem("brandSnap_user");
+    const savedUser = localStorage.getItem("guessTheBrand_user") || localStorage.getItem("brandSnap_user");
     if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
@@ -78,6 +78,7 @@ export const BrandGuessGame = () => {
         setGameState("start");
       } catch (error) {
         console.error("Error parsing saved user:", error);
+        localStorage.removeItem("guessTheBrand_user");
         localStorage.removeItem("brandSnap_user");
       }
     }
@@ -172,14 +173,14 @@ export const BrandGuessGame = () => {
     const baseUrl = new URL(url);
     baseUrl.searchParams.set("utm_source", "ecatalog");
     baseUrl.searchParams.set("utm_medium", medium);
-    baseUrl.searchParams.set("utm_campaign", "brand-snap");
+    baseUrl.searchParams.set("utm_campaign", "guess-the-brand");
     return baseUrl.toString();
   };
 
   const handleLogin = (name: string, email: string) => {
     const newUser = { name, email };
     setUser(newUser);
-    localStorage.setItem("brandSnap_user", JSON.stringify(newUser));
+    localStorage.setItem("guessTheBrand_user", JSON.stringify(newUser));
     setGameState("start");
     toast.success(`Welcome ${name}! 🎉`);
   };
@@ -348,7 +349,7 @@ export const BrandGuessGame = () => {
                 <Trophy className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Brand Snap
+                Guess the Brand
               </h1>
               <p className="text-muted-foreground">
                 Welcome back, {user?.name}! Ready to test your brand knowledge?
@@ -630,7 +631,7 @@ export const BrandGuessGame = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
-            Brand Snap
+            Guess the Brand
           </h1>
           <p className="text-muted-foreground">
             Welcome {user?.name}! Test your brand knowledge

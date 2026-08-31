@@ -66,7 +66,7 @@ const Admin = () => {
                                 <Database className="w-6 h-6 text-white" />
                             </div>
                             <span className="text-xl font-extrabold tracking-tight text-slate-900">
-                                BRAND<span className="text-jumia">SNAP</span> ADMIN
+                                GUESS THE <span className="text-jumia">BRAND</span> ADMIN
                             </span>
                         </div>
                         <div className="flex items-center gap-4">
@@ -101,7 +101,7 @@ const Admin = () => {
             </main>
 
             <footer className="py-8 text-center text-slate-400 text-sm">
-                &copy; {new Date().getFullYear()} Brand Snap Game. Administrative Portal.
+                &copy; {new Date().getFullYear()} Guess the Brand Game. Administrative Portal.
             </footer>
         </div>
     );
