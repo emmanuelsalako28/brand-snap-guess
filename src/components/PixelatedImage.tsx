@@ -13,7 +13,7 @@ export const PixelatedImage: React.FC<PixelatedImageProps> = ({
   src,
   alt,
   isPixelated = true,
-  blurSize = 8,
+  blurSize = 3,
   className = "",
 }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -32,11 +32,9 @@ export const PixelatedImage: React.FC<PixelatedImageProps> = ({
         onLoad={() => setIsLoading(false)}
         onError={() => setIsLoading(false)}
         style={{
-          filter: isPixelated ? `blur(${blurSize}px)` : "blur(0px)",
+          filter: isPixelated ? `blur(${blurSize}px) brightness(1.05)` : "blur(0px) brightness(1)",
         }}
-        className={`w-full h-full object-contain rounded transition-all duration-700 ease-out transform ${
-          isPixelated ? "scale-105" : "scale-100"
-        }`}
+        className="w-full h-full object-contain rounded transition-all duration-700 ease-out"
       />
     </div>
   );

@@ -492,7 +492,7 @@ export const BrandGuessGame = () => {
                 src={question.image}
                 alt="Brand product"
                 isPixelated={!isAnswered}
-                pixelSize={18}
+                blurSize={3}
               />
             </div>
           </div>
