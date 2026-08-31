@@ -333,7 +333,7 @@ export const BrandGuessGame = () => {
       return (
         <div className="flex items-center justify-center min-h-[60vh]">
           <Card className="w-full max-w-md p-8 text-center space-y-6 bg-gradient-to-br from-card to-card/80 border-jumia/20">
-            <p className="text-destructive">No questions found. Please check your Google Sheet.</p>
+            <p className="text-destructive">Please try again later</p>
           </Card>
         </div>
       );
