@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { Trophy, RotateCcw, Play, Send, Medal, Crown, Loader2 } from "lucide-react";
 import { LoginForm } from "./LoginForm";
+import { PixelatedImage } from "./PixelatedImage";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, getDocs, query, orderBy, limit, where } from "firebase/firestore";
 import { fetchQuestionsFromSheet, SheetQuestion } from "@/lib/googleSheets";
@@ -486,11 +487,12 @@ export const BrandGuessGame = () => {
         <Card className="p-6 mb-6 bg-gradient-to-br from-card to-card/80 border-primary/20">
           <div className="text-center space-y-6">
             <h2 className="text-xl font-semibold">{question.questionText}</h2>
-            <div className="relative w-64 h-64 mx-auto bg-white rounded-lg p-4 shadow-lg">
-              <img
+            <div className="relative w-64 h-64 mx-auto bg-white rounded-lg p-4 shadow-lg overflow-hidden">
+              <PixelatedImage
                 src={question.image}
                 alt="Brand product"
-                className="w-full h-full object-contain rounded blur-0 scale-100 transition-all duration-700"
+                isPixelated={!isAnswered}
+                pixelSize={18}
               />
             </div>
           </div>
